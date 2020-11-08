@@ -1,5 +1,11 @@
 require('dotenv').config();
 
+let { MONGO_URL } = process.env;
+const { NODE_ENV } = process.env;
+if (NODE_ENV !== 'production') {
+  MONGO_URL = 'mongodb://localhost:27017/news';
+}
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -13,7 +19,7 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const NotFoundError = require('./errors/notFoundError');
 
-mongoose.connect('mongodb://localhost:27017/news', {
+mongoose.connect(MONGO_URL, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,

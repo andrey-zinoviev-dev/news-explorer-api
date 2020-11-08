@@ -1,12 +1,14 @@
 const Article = require('../models/article');
 const BadRequestError = require('../errors/badRequestError');
 const UnauthorizedError = require('../errors/unauthorizedError');
+const NotFoundError = require('../errors/notFoundError');
+const ForbiddenError = require('../errors/forbiddenError');
 
 const showAllArticles = (req, res, next) => {
   Article.find({})
     .then((data) => {
       if (data.length === 0) {
-        return next(new BadRequestError('Статьи не найдены'));
+        return next(new NotFoundError('Статьи не найдены'));
       }
       return res.status(200).send(data);
     })
@@ -24,8 +26,8 @@ const createArticle = (req, res, next) => {
     keyword, title, text, date, source, link, image, owner: _id.toString(),
   })
     .then(() => res.status(201).send({ message: 'Статья сохранена' }))
-    .catch((err) => {
-      next(new BadRequestError('Проверьте данные статьи'));
+    .catch(() => {
+      next(new BadRequestError('Проверьте корректные данные статьи'));
     });
 };
 
@@ -35,14 +37,22 @@ const deleteArticle = (req, res, next) => {
   Article.findById(id).select('+owner')
     .then((data) => {
       if (data.owner.toString() !== _id) {
-        return next(new UnauthorizedError('Неавторизованы для удаления'));
+        return next(new ForbiddenError('Неавторизованы для удаления'));
       }
-      return res.status(201).send({ message: 'Статья успешно удалена' });
+      return Article.findByIdAndDelete(id)
+      .then((card) => {
+        if (!card) {
+          throw new NotFoundError('Неправильный запрос');
+        }
+        return res.status(201).send({ message: 'Статья успешно удалена' });
+      })
+      .catch((err) => {
+        next(err);
+      });
     })
     .catch(() => {
-      next(new BadRequestError('Неверный запрос'));
+      next(new NotFoundError('Неправильный запрос статьи для ее удаления'));
     });
-  // res.status(200).send({ message: "Скоро роут заработает" });
 };
 
 module.exports = {
