@@ -10,6 +10,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
+const cors = require('cors');
 const auth = require('./middlewares/auth');
 const { registerUser, loginUser } = require('./controllers/user');
 const indexRouter = require('./route/index');
@@ -26,6 +27,9 @@ mongoose.connect(MONGO_URL, {
 });
 
 app.use(bodyParser.json());
+app.use(cors({
+  origin: 'http//localhost:3000',
+}));
 
 app.use(requestLogger);
 
