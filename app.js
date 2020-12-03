@@ -28,7 +28,7 @@ mongoose.connect(MONGO_URL, {
 
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://t29.students.nomoreparties.co',
+  origin: 'http://localhost:3000',
 }));
 
 app.use(requestLogger);
